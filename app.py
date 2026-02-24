@@ -18,7 +18,7 @@ st.set_page_config(page_title="The Mine AI", page_icon="💎")
 
 # පින්තූරය සහ නම පෙන්වීම
 st.title("💎 The Mine AI")
-st.image("lahiru.jpg", caption="The Mine නිර්මාණකරු: ළහිරු", width=150)
+st.image("IMG-20250323-WA0011.jpg" caption="The Mine නිර්මාණකරු: ළහිරු", width=150)
 st.write(f"ආයුබෝවන් ළහිරු! මම 'The Mine'. මම ඔයාට උදව් කරන්න සූදානම්.")
 
 if "messages" not in st.session_state:
