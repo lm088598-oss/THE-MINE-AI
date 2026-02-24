@@ -2,24 +2,19 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- මෙතනට ඔයාගේ API Key එක දාන්න ---
-API_KEY = "AIzaSyBmlbUS2TmfPKYhNVPJekL1RhoaXE70X7c" # ඔයාගේ Key එක මෙතන තියෙනවා නේද?
+API_KEY = "AIzaSyBmlbUS2TmfPKYhNVF..." # ඔයාගේ කලින් තිබුණ Key එක මෙතන තියෙයි
 
 genai.configure(api_key=API_KEY)
 
 # AI එකට දෙන උපදෙස්
 instructions = """
-ඔබේ නම 'The Mine'. ඔබේ නිර්මාණකරු ළහිරු එම් ලියනආරච්චි  (Lahiru m liyanaarachchi) ය. 
-සෑම පිළිතුරකදීම 'ළහිරු' යන නම ආමන්ත්‍රණය කරමින් ඉතා සුහදව කතා කරන්න.
+ඔබේ නම 'The Mine'. ඔබේ නිර්මාණකරු 'ළහිරු එම් ලියනආරච්චි' (Lahiru M. Liyanaarachchi) වේ. 
+සෑම පිළිතුරකදීම 'ළහිරු' යන නම ආඩම්බරයෙන් සඳහන් කරන්න.
 """
 
 model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=instructions)
 
-st.set_page_config(page_title="The Mine AI", page_icon="💎")
-
-# පින්තූරය සහ නම පෙන්වීම
 st.title("💎 The Mine AI")
-st.image("IMG-20250323-WA0011.jpg" caption="The Mine නිර්මාණකරු: ළහිරු", width=150)
-st.write(f"ආයුබෝවන් ළහිරු! මම 'The Mine'. මම ඔයාට උදව් කරන්න සූදානම්.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -28,12 +23,19 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("මොකක්ද වෙන්න ඕනේ?"):
+prompt = st.chat_input("මොනවාද දැනගන්න ඕනේ?")
+
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
+    if "owner" in prompt.lower() or "අයිතිකරු" in prompt or "lahiru" in prompt.lower():
+        with st.chat_message("assistant"):
+            st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanaarachchi!")
+            st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
+    else:
         response = model.generate_content(prompt)
-        st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
+        with st.chat_message("assistant"):
+            st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
