@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- ඔයා දුන්නු අලුත් API Key එක ---
+# --- ඔයාගේ අලුත් API Key එක මෙතන තියෙනවා ---
 API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0" 
 
 genai.configure(api_key=API_KEY)
@@ -12,8 +12,8 @@ instructions = """
 සෑම පිළිතුරකදීම 'ළහිරු' යන නම ආඩම්බරයෙන් සඳහන් කරන්න.
 """
 
-# මෙතන model name එක මම 'models/gemini-1.5-flash' ලෙස වෙනස් කළා
-model = genai.GenerativeModel(model_name="models/gemini-1.5-flash", system_instruction=instructions)
+# මෙතන මම model name එක ගොඩක්ම stable විදිහට 'gemini-1.5-flash' ලෙස සරල කළා
+model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=instructions)
 
 st.set_page_config(page_title="The Mine AI", page_icon="💎")
 st.title("💎 The Mine AI")
@@ -35,15 +35,24 @@ if prompt:
     if any(word in prompt.lower() for word in ["owner", "අයිතිකරු", "lahiru", "ළහිරු"]):
         with st.chat_message("assistant"):
             st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
-            st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
+            # පින්තූරය පෙන්වීම
+            try:
+                st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
+            except:
+                st.warning("පින්තූරය සොයාගත නොහැක. පින්තූරයේ නම නිවැරදිදැයි බලන්න.")
             st.session_state.messages.append({"role": "assistant", "content": "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"})
     else:
         try:
-            # AI එකෙන් පිළිතුර ලබා ගැනීම
+            # මෙතන මම පොඩි වෙනසක් කළා API එකට කෙළින්ම කතා කරන්න
             response = model.generate_content(prompt)
-            with st.chat_message("assistant"):
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+            
+            if response.text:
+                with st.chat_message("assistant"):
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+            else:
+                st.error("AI එකෙන් පිළිතුරක් ලැබුණේ නැත.")
+                
         except Exception as e:
-            # කිසියම් දෝෂයක් ආවොත් ඒක පෙන්වනවා
-            st.error(f"පොඩි ප්‍රශ්නයක් වුණා: {e}")
+            # Error එක විස්තරාත්මකව පෙන්වන්න
+            st.error(f"ප්‍රශ්නයක් වුණා: {str(e)}")
