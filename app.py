@@ -1,8 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- ඔයාගේ API Key එක පහළ ඇති quotation marks ඇතුළට දාන්න ---
-API_KEY = "AIzaSyAYdOsxVR4v1J91u0o3ZyPjuHddjFBlhbg" # ඔයාගේ කලින් තිබුණ Key එක මෙතන තියෙයි
+# --- අලුත් API Key එක මෙතන තියෙන්නේ ---
+API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0" 
 
 genai.configure(api_key=API_KEY)
 
@@ -35,11 +35,14 @@ if prompt:
     if any(word in prompt.lower() for word in ["owner", "අයිතිකරු", "lahiru", "ළහිරු"]):
         with st.chat_message("assistant"):
             st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
-            # මෙන්න මෙතන තිබුණ වැරදි වරහන මම අයින් කළා:
+            # කලින් තිබුණ Syntax Error එක මෙතන මම හදලා තියෙන්නේ
             st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
             st.session_state.messages.append({"role": "assistant", "content": "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"})
     else:
-        response = model.generate_content(prompt)
-        with st.chat_message("assistant"):
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        try:
+            response = model.generate_content(prompt)
+            with st.chat_message("assistant"):
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error(f"පොඩි ප්‍රශ්නයක් වුණා: {e}")
