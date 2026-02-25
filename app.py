@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- අලුත් API Key එක මෙතන තියෙන්නේ ---
+# --- ඔයා දුන්නු අලුත් API Key එක ---
 API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0" 
 
 genai.configure(api_key=API_KEY)
@@ -12,7 +12,8 @@ instructions = """
 සෑම පිළිතුරකදීම 'ළහිරු' යන නම ආඩම්බරයෙන් සඳහන් කරන්න.
 """
 
-model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=instructions)
+# මෙතන model name එක මම 'models/gemini-1.5-flash' ලෙස වෙනස් කළා
+model = genai.GenerativeModel(model_name="models/gemini-1.5-flash", system_instruction=instructions)
 
 st.set_page_config(page_title="The Mine AI", page_icon="💎")
 st.title("💎 The Mine AI")
@@ -31,18 +32,18 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # අයිතිකරු ගැන අහන විට ෆොටෝ එක පෙන්වීමට
     if any(word in prompt.lower() for word in ["owner", "අයිතිකරු", "lahiru", "ළහිරු"]):
         with st.chat_message("assistant"):
             st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
-            # කලින් තිබුණ Syntax Error එක මෙතන මම හදලා තියෙන්නේ
             st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
             st.session_state.messages.append({"role": "assistant", "content": "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"})
     else:
         try:
+            # AI එකෙන් පිළිතුර ලබා ගැනීම
             response = model.generate_content(prompt)
             with st.chat_message("assistant"):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
+            # කිසියම් දෝෂයක් ආවොත් ඒක පෙන්වනවා
             st.error(f"පොඩි ප්‍රශ්නයක් වුණා: {e}")
