@@ -1,65 +1,66 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. API Key එක (මෙය එහෙම්ම තියෙන්න හරින්න)
+# API Key එක
 API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0"
 genai.configure(api_key=API_KEY)
 
-# 2. Model එක නිවැරදිව හඳුන්වා දීම
-try:
-    model = genai.GenerativeModel("gemini-1.5-flash")
-except:
-    model = genai.GenerativeModel("models/gemini-1.5-flash")
+# --- මෙන්න මෙතනයි වෙනස තියෙන්නේ ---
+# පද්ධතිය විසින් පිළිගන්නා ඕනෑම නමක් සොයා ගැනීමට උත්සාහ කරයි
+model_to_use = "gemini-1.5-flash" # Default නම
 
-# Page එකේ සැකසුම්
+try:
+    # Google විසින් ලබා දෙන models list එක පරීක්ෂා කිරීම
+    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    if 'models/gemini-1.5-flash' in available_models:
+        model_to_use = 'models/gemini-1.5-flash'
+    elif 'models/gemini-pro' in available_models:
+        model_to_use = 'models/gemini-pro'
+except:
+    # List එක ගන්න බැරි වුණොත් වඩාත් ස්ථාවර නම පාවිච්චි කරයි
+    model_to_use = "gemini-pro" 
+
+model = genai.GenerativeModel(model_to_use)
+
+# Page Setup
 st.set_page_config(page_title="The Mine AI", page_icon="💎")
 st.title("💎 The Mine AI")
 
-# AI එකට දෙන පොදු උපදෙස්
-instructions = "ඔබේ නම 'The Mine'. ඔබේ නිර්මාණකරු 'ළහිරු' (Lahiru M. Liyanarachchi) වේ."
-
-# Chat history එක මතක තබා ගැනීම
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# කලින් කතා කරපු දේවල් පෙන්වීම
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# User ගෙන් ප්‍රශ්නය ලබා ගැනීම
 prompt = st.chat_input("මොනවාද දැනගන්න ඕනේ?")
 
 if prompt:
-    # User ගේ ප්‍රශ්නය Chat එකේ පෙන්වීම
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # --- අයිතිකරු ගැන අහනවා නම් (මෙය AI එකට යන්නේ නැතිව කෙළින්ම වැඩ කරයි) ---
-    owner_keywords = ["owner", "අයිතිකරු", "කවුද හැදුවේ", "lahiru", "ළහිරු", "aitikaru", "kawda"]
-    
+    # 1. අයිතිකරු ගැන අහනවා නම් (මෙය කෙලින්ම ක්‍රියා කරයි)
+    owner_keywords = ["owner", "අයිතිකරු", "කවුද හැදුවේ", "lahiru", "ළහිරු", "aitikaru"]
     if any(word in prompt.lower() for word in owner_keywords):
         with st.chat_message("assistant"):
-            response_text = "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"
-            st.markdown(f"**{response_text}**")
+            res = "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"
+            st.markdown(f"**{res}**")
             try:
-                # ඔයාගේ Photo එක මෙතනින් පෙන්වයි
-                st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
+                st.image("IMG-20250323-WA0011.jpg")
             except:
-                st.warning("පින්තූරය (IMG-20250323-WA0011.jpg) සොයාගත නොහැකි විය. එය එකම Folder එකේ තියෙනවාදැයි බලන්න.")
-            
-            st.session_state.messages.append({"role": "assistant", "content": response_text})
+                pass
+            st.session_state.messages.append({"role": "assistant", "content": res})
 
-    # --- වෙනත් ප්‍රශ්න සඳහා AI භාවිතා කිරීම ---
+    # 2. වෙනත් ප්‍රශ්න සඳහා
     else:
         try:
-            full_prompt = f"{instructions}\n\nපරිශීලකයාගේ ප්‍රශ්නය: {prompt}"
-            response = model.generate_content(full_prompt)
-            
+            # 'instructions' වෙනුවට කෙලින්ම prompt එක යවමු තහවුරු කරගන්න
+            response = model.generate_content(f"ඔබේ නම 'The Mine'. නිර්මාණකරු 'ළහිරු'. ප්‍රශ්නය: {prompt}")
             with st.chat_message("assistant"):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error("AI සම්බන්ධතාවයේ දෝෂයක් පවතී.")
-            st.info(f"Technical Error: {e}")
+            # තවමත් error එකක් එනවා නම් නම මාරු කරමු
+            st.error("AI තාක්ෂණික දෝෂයක්. කරුණාකර 'gemini-pro' ලෙස මාරු වී නැවත උත්සාහ කරන්න.")
+            st.info(f"Model used: {model_to_use} | Error: {e}")
