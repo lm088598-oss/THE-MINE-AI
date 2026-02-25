@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- ඔයාගේ API Key එක පහළ ඇති quotation marks ඇතුළට දාන්න ---
-API_KEY = "AIzaSyAYdOsxVR4v1J91u0o3ZyPjuHddjFBlhbg"# ඔයාගේ කලින් තිබුණ Key එක මෙතන තියෙයි
+API_KEY = "AIzaSyAYdOsxVR4v1J91u0o3ZyPjuHddjFBlhbg" # ඔයාගේ කලින් තිබුණ Key එක මෙතන තියෙයි
 
 genai.configure(api_key=API_KEY)
 
@@ -35,7 +35,8 @@ if prompt:
     if any(word in prompt.lower() for word in ["owner", "අයිතිකරු", "lahiru", "ළහිරු"]):
         with st.chat_message("assistant"):
             st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
-            st.image("IMG-20250323-WA0011.jpg"), caption="Lahiru M. Liyanarachchi")
+            # මෙන්න මෙතන තිබුණ වැරදි වරහන මම අයින් කළා:
+            st.image("IMG-20250323-WA0011.jpg", caption="Lahiru M. Liyanarachchi")
             st.session_state.messages.append({"role": "assistant", "content": "මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!"})
     else:
         response = model.generate_content(prompt)
