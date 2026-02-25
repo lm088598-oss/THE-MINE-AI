@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # ඔයා ගත්ත අලුත්ම API Key එක
-API_KEY = "AIzaSyAcuJQjVzZGazuXxaW9VSQAiPv2-CKphKw"
+API_KEY = "AIzaSyBeAebItnPn1ZtDNdwKlvKIbZGup2rZKfk"
 
 # 1. පද්ධතියට 'v1' ස්ථාවර සංස්කරණය භාවිතා කිරීමට බල කිරීම
 genai.configure(api_key=API_KEY, transport="rest")
