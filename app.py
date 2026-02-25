@@ -1,19 +1,33 @@
 import streamlit as st
 import google.generativeai as genai
+import os
 
-# 1. API Key එක (මෙය එහෙම්ම තියෙන්න හරින්න)
+# 1. API Key එක (මෙය ක්‍රියාත්මක විය යුතුමයි)
 API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0"
 genai.configure(api_key=API_KEY)
 
-# Page Settings
+# 2. Model එක Configure කිරීම (අලුත්ම ක්‍රමය)
+# මෙතැනදී අපි 'models/gemini-1.5-flash' යන සම්පූර්ණ නම භාවිතා කරනවා
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-flash",
+  generation_config=generation_config,
+)
+
 st.set_page_config(page_title="The Mine AI", page_icon="💎")
 st.title("💎 The Mine AI")
 
-# Chat history
+# Chat history එක පවත්වාගෙන යාම
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display history
+# පරණ මැසේජ් පෙන්වීම
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -25,26 +39,29 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # --- අයිතිකරු ගැන අහන කොටස (මෙතන කිසිම Error එකක් එන්නේ නැහැ) ---
-    owner_keywords = ["owner", "අයිතිකරු", "කවුද හැදුවේ", "lahiru", "ළහිරු", "aitikaru", "kawda"]
-    
-    if any(word in prompt.lower() for word in owner_keywords):
+    # අයිතිකරු ගැන අහනවා නම් (Direct Response)
+    if any(word in prompt.lower() for word in ["owner", "අයිතිකරු", "ළහිරු", "lahiru"]):
         with st.chat_message("assistant"):
-            st.success("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
+            st.write("මගේ අයිතිකරු තමයි Lahiru M. Liyanarachchi!")
             try:
                 st.image("IMG-20250323-WA0011.jpg")
             except:
-                st.info("Photo එක තාම Upload කරලා නැහැ වගේ.")
-            st.session_state.messages.append({"role": "assistant", "content": "Lahiru M. Liyanarachchi"})
-
-    # --- වෙනත් ප්‍රශ්න වලට AI පිළිතුරු (Error එකක් ආවොත් පෙන්වන්නේ නැත) ---
+                pass
+    
+    # වෙනත් ඕනෑම ප්‍රශ්නයකට AI එකෙන් පිළිතුරු ලබා ගැනීම
     else:
-        try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(prompt)
-            with st.chat_message("assistant"):
+        with st.chat_message("assistant"):
+            try:
+                # AI එකට උපදෙස් ලබා දීම
+                chat_session = model.start_chat(history=[])
+                response = chat_session.send_message(prompt)
+                
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except:
-            with st.chat_message("assistant"):
-                st.write("සමාවෙන්න, මට දැන් පිළිතුරක් දෙන්න බැහැ. පසුව උත්සාහ කරන්න.")
+            except Exception as e:
+                # මෙතනදී එන error එක නිවැරදිව හඳුනා ගැනීමට
+                st.error("AI පද්ධතියට සම්බන්ධ වීමට නොහැකි විය.")
+                if "404" in str(e):
+                    st.warning("ඔබේ API Key එක තවමත් සක්‍රීය වී නැත. කරුණාකර විනාඩි 5ක් ඉන්න.")
+                else:
+                    st.info(f"දෝෂය: {e}")
