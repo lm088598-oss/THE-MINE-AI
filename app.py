@@ -1,14 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ඔයාගේ API Key එක
+# API Key එක
 API_KEY = "AIzaSyDfSVvaqBMJjvJyYtrdAf0ozBn_IsOVAN0"
 genai.configure(api_key=API_KEY)
 
 # AI එකට දෙන උපදෙස්
-instructions = "ඔබේ නම 'The Mine'. ඔබේ නිර්මාණකරු 'ළහිරු' වේ. සෑම පිළිතුරකදීම 'ළහිරු' යන නම ආඩම්බරයෙන් සඳහන් කරන්න."
+instructions = "ඔබේ නම 'The Mine'. ඔබේ නිර්මාණකරු 'ළහිරු' වේ."
 
-# --- මෙන්න මෙතන මම වෙනසක් කළා (Version Error එක නැති කරන්න) ---
+# Model එක stable විදිහට හඳුන්වා දීම
 try:
     model = genai.GenerativeModel("gemini-1.5-flash")
 except:
@@ -40,13 +40,10 @@ if prompt:
                 pass
     else:
         try:
-            # මෙතන full prompt එක කෙළින්ම යවනවා stable වෙන්න
-            full_prompt = f"{instructions}\n\nUser Question: {prompt}"
+            full_prompt = f"{instructions}\n\nQuestion: {prompt}"
             response = model.generate_content(full_prompt)
-            
             with st.chat_message("assistant"):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            # මෙතනදී Error එකක් ආවොත්, ඒක මොකක්ද කියලා ලෙහෙසියෙන් බලාගමු
-            st.error(f"පොඩි ප්‍රශ්නයක් වුණා: {str(e)}")
+            st.error(f"ප්‍රශ්නයක් වුණා: {e}")
